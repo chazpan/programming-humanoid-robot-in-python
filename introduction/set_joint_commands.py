@@ -13,7 +13,6 @@ from spark_agent import SparkAgent
 
 
 class MyAgent(SparkAgent):
-    t = False
     def think(self, perception):
         action = super(MyAgent, self).think(perception)
 
