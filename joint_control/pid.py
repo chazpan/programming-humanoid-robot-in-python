@@ -16,7 +16,7 @@ sys.path.append(os.path.join(os.path.abspath(os.path.dirname(__file__)), '..', '
 
 import numpy as np
 from collections import deque
-from spark_agent import SparkAgent, JOINT_CMD_NAMES
+from spark_agent import SparkAgent, JOINT_CMD_NAMES,INVERSED_JOINTS
 
 
 class PIDController(object):
@@ -35,9 +35,9 @@ class PIDController(object):
         self.e2 = np.zeros(size)
         # ADJUST PARAMETERS BELOW
         delay = 0
-        self.Kp = 0
-        self.Ki = 0
-        self.Kd = 0
+        self.Kp = 70
+        self.Ki = 0.05
+        self.Kd = 0.5
         self.y = deque(np.zeros(size), maxlen=delay + 1)
 
     def set_delay(self, delay):
@@ -53,6 +53,17 @@ class PIDController(object):
         @return control signal
         '''
         # YOUR CODE HERE
+
+        e = target - sensor
+        for i in range(0,len(e)):
+            if(np.abs(e[i]) < 0.00001):
+                e[i] = 0.0
+
+
+        self.u =  self.Kp*e + self.Kd*(self.e1-e)*self.dt+ self.Ki*(e + self.e1 + self.e2)/self.dt
+        #self.Kp+self.Ki*self.dt+self.Kd/self.dt)*e-(self.Kp+(2*self.Kd)/self.dt)*self.e1+self.Kd/self.dt*self.e2
+        self.e2 = self.e1
+        self.e1 = e
 
         return self.u
 
@@ -70,6 +81,7 @@ class PIDAgent(SparkAgent):
         self.target_joints = {k: 0 for k in self.joint_names}
 
     def think(self, perception):
+        print perception.time
         action = super(PIDAgent, self).think(perception)
         joint_angles = np.asarray(perception.joint.values())
         target_angles = np.asarray(self.target_joints.values())
