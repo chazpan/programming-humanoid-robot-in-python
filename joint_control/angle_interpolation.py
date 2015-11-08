@@ -36,7 +36,7 @@ class AngleInterpolationAgent(PIDAgent):
     def think(self, perception):
         target_joints = self.angle_interpolation(self.keyframes, perception)
         self.target_joints.update(target_joints)
-        
+
         action = super(AngleInterpolationAgent, self).think(perception)
 
         return  action
@@ -44,6 +44,7 @@ class AngleInterpolationAgent(PIDAgent):
     def generate_bezier(self, p):
 
         n = len(p)
+
         c = self.pascal(n-1)
 
         def bezier(t):
@@ -98,15 +99,14 @@ class AngleInterpolationAgent(PIDAgent):
                 else:
                     break
             p = []
-            
+
             point = position[indexTime]
-
             p.append((times[indexTime],point[0]))
-            p.append((times[indexTime]+point[2][1],point[0]+point[2][2]))
+            p.append((times[indexTime]+point[2][1],point[0]+point[1][2]))
             point = position[indexTime+1]
-
+            p.append((times[indexTime+1]+point[1][1],point[0]+point[2][2]))
             p.append((times[indexTime+1],point[0]))
-            p.append((times[indexTime+1]+point[1][1],point[0]+point[1][2]))
+
             bezier = self.generate_bezier(p)
 
 
